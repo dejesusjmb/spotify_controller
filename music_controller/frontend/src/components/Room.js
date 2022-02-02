@@ -1,35 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom'
+import React, { Component } from "react";
 
-
-export default function Room(props) {
-    const initialState = {
-      votesToSKip: 2,
+export default class Room extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      votesToSkip: 2,
       guestCanPause: false,
-      isHost: false
-    }
-    const [roomData, setRoomData] = useState(initialState) 
-    const { roomCode } = useParams()
-  
-  
-    useEffect(() => {
-      fetch("/api/get-room" + "?code=" + roomCode)
-        .then(res => res.json())
-        .then(data => {
-          setRoomData({
-            ...roomData, 
-            votesToSKip: data.votes_to_skip,
-            guestCanPause: data.guest_can_pause,
-            isHost: data.is_host,
-          })
-        })
-    },[roomCode,setRoomData]) //It renders when the object changes .If we use roomData and/or roomCode then it rerenders infinite times
+      isHost: false,
+    };
+    this.roomCode = this.props.match.params.roomCode;
+    this.getRoomDetails();
+  }
+
+  getRoomDetails() {
+    fetch("/api/get-room" + "?code=" + this.roomCode)
+      .then((response) => response.json())
+      .then((data) => {
+        this.setState({
+          votesToSkip: data.votes_to_skip,
+          guestCanPause: data.guest_can_pause,
+          isHost: data.is_host,
+        });
+      });
+  }
+
+  render() {
     return (
       <div>
-        <h3>{roomCode}</h3>
-        <p>Votes: {roomData.votesToSKip}</p>  
-        <p>Guest: {roomData.guestCanPause.toString()}</p>
-        <p>Host: {roomData.isHost.toString()}</p>  
+        <h3>{this.roomCode}</h3>
+        <p>Votes: {this.state.votesToSkip}</p>
+        <p>Guest Can Pause: {this.state.guestCanPause.toString()}</p>
+        <p>Host: {this.state.isHost.toString()}</p>
       </div>
-    )
+    );
   }
+}
